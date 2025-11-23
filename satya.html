@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Password Strength Checker</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg-1: #0f172a;
+      --bg-2: #07103a;
+      --card: rgba(255,255,255,0.06);
+      --accent: linear-gradient(90deg,#7c3aed,#06b6d4);
+      --glass: rgba(255,255,255,0.04);
+      --green:#22c55e; /* for strong */
+      --yellow:#f59e0b; /* for medium */
+      --red:#ef4444; /* for weak */
+      --blue:#60a5fa;
+      color-scheme: dark;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(124,58,237,0.12), transparent),
+                  radial-gradient(900px 500px at 90% 90%, rgba(6,182,212,0.08), transparent),
+                  linear-gradient(180deg,var(--bg-1),var(--bg-2));
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      display:flex;align-items:center;justify-content:center;padding:40px;
+      gap:20px;flex-direction:column;
+    }
+
+    .container{
+      width:100%;max-width:980px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:18px;padding:28px;box-shadow:0 8px 30px rgba(2,6,23,0.6);display:grid;grid-template-columns:420px 1fr;gap:24px;align-items:start;
+      border:1px solid rgba(255,255,255,0.03);
+    }
+
+    .brand{
+      display:flex;gap:12px;align-items:center;margin-bottom:10px
+    }
+    .logo{
+      width:56px;height:56px;border-radius:12px;background:var(--accent);display:grid;place-items:center;color:white;font-weight:700;box-shadow:0 6px 18px rgba(124,58,237,0.15);
+    }
+    h1{font-size:20px;margin:0;color:#e6eef8}
+    p.lead{margin:6px 0 18px;color:#bcd3ef;font-size:13px}
+
+    .card{
+      background:var(--card);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);
+    }
+
+    label{display:block;font-size:13px;color:#bcd3ef;margin-bottom:8px}
+    .input-row{display:flex;gap:8px}
+    input[type="password"]{flex:1;padding:12px 14px;border-radius:10px;border:none;background:rgba(255,255,255,0.02);color:#e6eef8;font-size:15px;outline:none}
+    button.icon{padding:8px 12px;border-radius:10px;border:none;background:rgba(255,255,255,0.03);color:#e6eef8;cursor:pointer}
+    .hint{font-size:12px;color:#9fb7db;margin-top:8px}
+
+    .strength-meter{margin-top:18px}
+    .meter-bar{height:12px;border-radius:999px;background:linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));overflow:hidden;border:1px solid rgba(255,255,255,0.02)}
+    .meter-fill{height:100%;width:10%;border-radius:999px;background:var(--green);transition:width .3s ease, background-color .3s ease}
+    .score-row{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+    .score-label{font-weight:600;color:#e6eef8}
+    .score-num{font-weight:700;color:#9fb7db}
+
+    .criteria{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:14px}
+    .criteria .item{display:flex;gap:8px;align-items:center;font-size:13px;color:#bcd3ef}
+    .dot{width:12px;height:12px;border-radius:50%;display:inline-block;background:rgba(255,255,255,0.06)}
+    .dot.ok{box-shadow:0 0 0 4px rgba(34,197,94,0.08);background:var(--green)}
+    .dot.warn{background:var(--yellow)}
+    .dot.bad{background:var(--red)}
+
+    /* Suggestions */
+    .suggestions{margin-top:16px;display:flex;flex-direction:column;gap:8px}
+    .suggestion{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));border:1px solid rgba(255,255,255,0.02)}
+    .suggestion .text{font-family:monospace;color:#cfe8ff}
+    .suggestion button{border:none;background:transparent;color:#9fb7db;cursor:pointer}
+
+    /* Right column */
+    .right{padding:8px}
+    .right h3{margin:0 0 8px 0;color:#e6eef8}
+    .stats{display:flex;gap:12px;margin-top:8px}
+    .stat{flex:1;padding:12px;border-radius:10px;background:var(--glass);border:1px solid rgba(255,255,255,0.02);min-height:78px}
+    .stat .big{font-size:18px;font-weight:700;color:#e6eef8}
+    .stat .small{font-size:13px;color:#bcd3ef;margin-top:6px}
+
+    .tips{margin-top:14px;color:#bcd3ef;font-size:13px;line-height:1.5}
+
+    footer{width:100%;max-width:980px;color:#98b9e6;font-size:13px;text-align:center;margin-top:12px}
+
+    /* responsive */
+    @media (max-width:880px){
+      .container{grid-template-columns:1fr;padding:18px}
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container" role="main">
+    <div>
+      <div class="brand">
+        <div class="logo">PS</div>
+        <div>
+          <h1>Password Strength Checker</h1>
+          <p class="lead">Instantly check password strength and get tailored suggestions to harden weak passwords.</p>
+        </div>
+      </div>
+
+      <div class="card" aria-live="polite">
+        <label for="pwd">Enter password</label>
+        <div class="input-row">
+          <input id="pwd" type="password" placeholder="Type a password to test" aria-describedby="pwd-hint">
+          <button id="toggle" class="icon" title="Show/Hide password">👁️</button>
+          <button id="generate" class="icon" title="Generate a random strong password">⚡</button>
+        </div>
+        <div id="pwd-hint" class="hint">Suggestions will appear when password is weak.</div>
+
+        <div class="strength-meter">
+          <div class="meter-bar" aria-hidden="true"><div class="meter-fill" style="width:10%"></div></div>
+          <div class="score-row">
+            <div class="score-label" id="strength-label">Very Weak</div>
+            <div class="score-num" id="strength-score">0%</div>
+          </div>
+
+          <div class="criteria" id="criteria-list">
+            <div class="item"><span class="dot" data-check="length"></span> At least 12 chars</div>
+            <div class="item"><span class="dot" data-check="lower"></span> Lowercase letter</div>
+            <div class="item"><span class="dot" data-check="upper"></span> Uppercase letter</div>
+            <div class="item"><span class="dot" data-check="number"></span> Number (0-9)</div>
+            <div class="item"><span class="dot" data-check="symbol"></span> Symbol (!@#$...)</div>
+            <div class="item"><span class="dot" data-check="unique"></span> Not a common word</div>
+          </div>
+
+          <div class="suggestions" id="suggestions"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right">
+      <h3>Quick stats</h3>
+      <div class="stats">
+        <div class="stat">
+          <div class="big" id="entropy">0 bits</div>
+          <div class="small">Estimated entropy</div>
+        </div>
+        <div class="stat">
+          <div class="big" id="time-to-crack">Instant</div>
+          <div class="small">Time to crack (online attack)</div>
+        </div>
+      </div>
+
+      <div class="tips card">
+        <strong>Best practices</strong>
+        <ul style="margin:8px 0 0 18px;padding:0">
+          <li>Use 12+ characters with mixed types.</li>
+          <li>Avoid dictionary words and repeated patterns.</li>
+          <li>Use a password manager to store random passwords.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <footer>Built with ❤️ — enter any password to see live analysis</footer>
+
+<script>
+// Utility: simple common words list (small) — in real app, use larger/dedicated list
+const commonWords = ['password','123456','qwerty','letmein','admin','welcome','iloveyou','monkey','dragon','football','baseball'];
+
+const pwd = document.getElementById('pwd');
+const toggle = document.getElementById('toggle');
+const generateBtn = document.getElementById('generate');
+const fill = document.querySelector('.meter-fill');
+const label = document.getElementById('strength-label');
+const scoreNum = document.getElementById('strength-score');
+const criteriaDots = document.querySelectorAll('.dot');
+const suggestionsEl = document.getElementById('suggestions');
+const entropyEl = document.getElementById('entropy');
+const ttcEl = document.getElementById('time-to-crack');
+
+function evaluate(password){
+  let score = 0;
+  const length = password.length;
+  const hasLower = /[a-z]/.test(password);
+  const hasUpper = /[A-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const hasSymbol = /[^A-Za-z0-9]/.test(password);
+  const uniqueChars = new Set(password).size;
+
+  // Length contribution (max 40)
+  if(length >= 12) score += 40;
+  else score += Math.max(0, (length / 12) * 40);
+
+  // Character variety (max 40)
+  const variety = [hasLower, hasUpper, hasNumber, hasSymbol].filter(Boolean).length;
+  score += variety * 10; // up to 40
+
+  // Uniqueness bonus
+  if(uniqueChars >= Math.min(12, length)) score += 10;
+
+  // Common word penalty
+  const lower = password.toLowerCase();
+  const isCommon = commonWords.includes(lower) || commonWords.some(w=> lower.includes(w));
+  if(isCommon) score -= 30;
+
+  // Repeats penalty
+  if(/(.)\1{3,}/.test(password)) score -= 10;
+
+  // Normalize
+  score = Math.round(Math.max(0, Math.min(100, score)));
+
+  // Entropy estimate (very rough): log2(charset^length) = length * log2(charset)
+  let charset = 0;
+  if(hasLower) charset += 26;
+  if(hasUpper) charset += 26;
+  if(hasNumber) charset += 10;
+  if(hasSymbol) charset += 32; // approximate
+  const entropy = password.length > 0 ? Math.round(password.length * (Math.log2(charset || 1))) : 0;
+
+  return {score, length, hasLower, hasUpper, hasNumber, hasSymbol, uniqueChars, isCommon, entropy};
+}
+
+function timeToCrackBits(bits){
+  // rough guesses: online attack ~1000 guesses/sec, offline ~1e10 guesses/sec
+  // we'll show online estimate
+  const guessesPerSec = 1e3; // online
+  const guesses = Math.pow(2, bits);
+  const seconds = guesses / guessesPerSec;
+  const mins = seconds/60; const hours = mins/60; const days = hours/24; const years = days/365;
+  if(years > 1000) return 'Centuries';
+  if(years >= 1) return Math.round(years) + ' years';
+  if(days >= 1) return Math.round(days) + ' days';
+  if(hours >= 1) return Math.round(hours) + ' hours';
+  if(mins >= 1) return Math.round(mins) + ' minutes';
+  if(seconds >= 1) return Math.round(seconds) + ' seconds';
+  return 'Instant';
+}
+
+function updateUI(){
+  const val = pwd.value;
+  const r = evaluate(val);
+
+  // meter
+  fill.style.width = r.score + '%';
+  // color
+  if(r.score < 30) fill.style.background = 'linear-gradient(90deg,var(--red),#ff7b7b)';
+  else if(r.score < 60) fill.style.background = 'linear-gradient(90deg,var(--yellow),#ffd27a)';
+  else fill.style.background = 'linear-gradient(90deg,var(--green),#7ef1a1)';
+
+  // label
+  let strengthText = 'Very Weak';
+  if(r.score >= 80) strengthText = 'Very Strong';
+  else if(r.score >= 60) strengthText = 'Strong';
+  else if(r.score >= 40) strengthText = 'Moderate';
+  else if(r.score >= 20) strengthText = 'Weak';
+  label.textContent = strengthText;
+  scoreNum.textContent = r.score + '%';
+
+  // criteria
+  criteriaDots.forEach(dot => {
+    const check = dot.dataset.check;
+    dot.classList.remove('ok','warn','bad');
+    if(check === 'length'){
+      if(r.length >= 12) dot.classList.add('ok');
+      else if(r.length >= 8) dot.classList.add('warn');
+      else dot.classList.add('bad');
+    } else if(check === 'lower'){
+      dot.classList.toggle('ok', r.hasLower);
+    } else if(check === 'upper'){
+      dot.classList.toggle('ok', r.hasUpper);
+    } else if(check === 'number'){
+      dot.classList.toggle('ok', r.hasNumber);
+    } else if(check === 'symbol'){
+      dot.classList.toggle('ok', r.hasSymbol);
+    } else if(check === 'unique'){
+      if(!r.isCommon && r.uniqueChars >= Math.min(8, Math.max(3,r.length))) dot.classList.add('ok');
+      else if(r.isCommon) dot.classList.add('bad');
+      else dot.classList.add('warn');
+    }
+  });
+
+  // suggestions (only show when weak)
+  suggestionsEl.innerHTML = '';
+  if(r.score < 60){
+    const s = generateSuggestions(val, 3);
+    s.forEach(pass => {
+      const wrap = document.createElement('div'); wrap.className='suggestion';
+      const txt = document.createElement('div'); txt.className='text'; txt.textContent = pass;
+      const btns = document.createElement('div');
+      const copy = document.createElement('button'); copy.textContent='Copy';
+      copy.onclick = ()=>{navigator.clipboard && navigator.clipboard.writeText(pass); copy.textContent='Copied'; setTimeout(()=>copy.textContent='Copy',1200)};
+      btns.appendChild(copy);
+      wrap.appendChild(txt); wrap.appendChild(btns);
+      suggestionsEl.appendChild(wrap);
+    });
+  }
+
+  entropyEl.textContent = r.entropy + ' bits';
+  ttcEl.textContent = timeToCrackBits(r.entropy);
+}
+
+function generateSuggestions(base, count=2){
+  const suggestions = [];
+  const seeds = base && base.length>0 ? [base] : ['mypassword','secure','access'];
+  while(suggestions.length < count){
+    const seed = seeds[suggestions.length % seeds.length];
+    let p = seed;
+
+    // 1) if too short, pad with mixed chars
+    if(p.length < 12) p += randomChars(12 - p.length);
+
+    // 2) randomly apply transformations
+    if(Math.random() < 0.7){ p = capitalizeRandom(p); }
+    if(Math.random() < 0.7){ p = substituteChars(p); }
+    if(Math.random() < 0.5){ p = insertSymbols(p); }
+
+    // ensure has numbers and symbol
+    if(!/[0-9]/.test(p)) p += Math.floor(Math.random()*90+10);
+    if(!/[^A-Za-z0-9]/.test(p)) p += '!#';
+
+    // final trim/pad
+    if(p.length < 12) p += randomChars(12 - p.length);
+    // avoid duplicates and too similar
+    if(!suggestions.includes(p) && p !== base) suggestions.push(p);
+  }
+  return suggestions.slice(0,count);
+}
+
+function randomChars(n){
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let out=''; for(let i=0;i<n;i++) out += chars.charAt(Math.floor(Math.random()*chars.length)); return out;
+}
+function capitalizeRandom(s){
+  return s.split('').map(c => Math.random()>0.7 ? c.toUpperCase() : c).join('');
+}
+function substituteChars(s){
+  const map = {'a':'@','s':'$','o':'0','i':'1','e':'3','t':'7'};
+  return s.split('').map(ch => (Math.random()>0.6 && map[ch.toLowerCase()]) ? map[ch.toLowerCase()] : ch).join('');
+}
+function insertSymbols(s){
+  const syms = '!@#$%^&*()-_+=';
+  const pos = Math.floor(Math.random()*(s.length+1));
+  const sym = syms.charAt(Math.floor(Math.random()*syms.length));
+  return s.slice(0,pos)+sym+s.slice(pos);
+}
+
+// events
+pwd.addEventListener('input', updateUI);
+
+toggle.addEventListener('click', ()=>{
+  pwd.type = pwd.type === 'password' ? 'text' : 'password';
+  toggle.textContent = pwd.type === 'password' ? '👁️' : '🙈';
+});
+
+generateBtn.addEventListener('click', ()=>{
+  const strong = generateSuggestions('',1)[0];
+  pwd.value = strong; updateUI();
+});
+
+// initial
+updateUI();
+</script>
+</body>
+</html>
