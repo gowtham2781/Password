@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Password Strength Checker</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container" role="main">
+    <div>
+      <div class="brand">
+        <div class="logo">PS</div>
+        <div>
+          <h1>Password Strength Checker</h1>
+          <p class="lead">Instantly check password strength and get tailored suggestions to harden weak passwords.</p>
+        </div>
+      </div>
+
+      <div class="card" aria-live="polite">
+        <label for="pwd">Enter password</label>
+        <div class="input-row">
+          <input id="pwd" type="password" placeholder="Type a password to test" aria-describedby="pwd-hint">
+          <button id="toggle" class="icon" title="Show/Hide password">👁️</button>
+          <button id="generate" class="icon" title="Generate a random strong password">⚡</button>
+        </div>
+        <div id="pwd-hint" class="hint">Suggestions will appear when password is weak.</div>
+
+        <div class="strength-meter">
+          <div class="meter-bar" aria-hidden="true"><div class="meter-fill"></div></div>
+          <div class="score-row">
+            <div class="score-label" id="strength-label">Very Weak</div>
+            <div class="score-num" id="strength-score">0%</div>
+          </div>
+
+          <div class="criteria" id="criteria-list">
+            <div class="item"><span class="dot" data-check="length"></span> At least 12 chars</div>
+            <div class="item"><span class="dot" data-check="lower"></span> Lowercase letter</div>
+            <div class="item"><span class="dot" data-check="upper"></span> Uppercase letter</div>
+            <div class="item"><span class="dot" data-check="number"></span> Number (0-9)</div>
+            <div class="item"><span class="dot" data-check="symbol"></span> Symbol (!@#$...)</div>
+            <div class="item"><span class="dot" data-check="unique"></span> Not a common word</div>
+          </div>
+
+          <div class="suggestions" id="suggestions"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right">
+      <h3>Quick stats</h3>
+      <div class="stats">
+        <div class="stat">
+          <div class="big" id="entropy">0 bits</div>
+          <div class="small">Estimated entropy</div>
+        </div>
+        <div class="stat">
+          <div class="big" id="time-to-crack">Instant</div>
+          <div class="small">Time to crack (online attack)</div>
+        </div>
+      </div>
+
+      <div class="tips card">
+        <strong>Best practices</strong>
+        <ul style="margin:8px 0 0 18px;padding:0">
+          <li>Use 12+ characters with mixed types.</li>
+          <li>Avoid dictionary words and repeated patterns.</li>
+          <li>Use a password manager to store random passwords.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <footer>Built with ❤️ — enter any password to see live analysis</footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
